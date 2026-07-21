@@ -220,6 +220,18 @@ export const MainNavbar: React.FC = () => {
       return item;
     });
 
+    // Existing configurations have a persisted menu allowlist that predates
+    // native Audio. Insert it beside Scenes when the library is enabled so an
+    // upgrade does not require users to repair their menu configuration.
+    if (
+      configuration?.general.enableAudioLibrary &&
+      !cfgMenuItems.includes("audios")
+    ) {
+      cfgMenuItems = [...cfgMenuItems];
+      const scenesIndex = cfgMenuItems.indexOf("scenes");
+      cfgMenuItems.splice(scenesIndex < 0 ? 0 : scenesIndex + 1, 0, "audios");
+    }
+
     return enabled(
       allMenuItems.filter((menuItem) => cfgMenuItems!.includes(menuItem.name))
     );
