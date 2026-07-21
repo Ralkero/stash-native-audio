@@ -107,7 +107,7 @@ export const LightboxImage: React.FC<IProps> = ({
   const mouseDownEvent = useRef<MouseEvent>();
   const resetPositionRef = useRef(resetPosition);
 
-  const container = React.createRef<HTMLDivElement>();
+  const container = useRef<HTMLDivElement>(null);
   const startPoints = useRef<number[]>([0, 0]);
   const pointerCache = useRef<React.PointerEvent[]>([]);
   const prevDiff = useRef<number | undefined>();
@@ -116,29 +116,54 @@ export const LightboxImage: React.FC<IProps> = ({
 
   useEffect(() => {
     const box = container.current;
-    if (box) {
-      setBoxWidth(box.offsetWidth);
-      setBoxHeight(box.offsetHeight);
-    }
+    if (!box) return;
 
-    function toggleVideoPlay() {
-      if (container.current) {
-        let openVideo = container.current.getElementsByTagName("video");
-        if (openVideo.length > 0) {
-          let rect = openVideo[0].getBoundingClientRect();
-          if (Math.abs(rect.x) < document.body.clientWidth / 2) {
-            openVideo[0].play();
-          } else {
-            openVideo[0].pause();
-          }
+    let animationFrame = 0;
+    const measure = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        setBoxWidth(box.offsetWidth);
+        setBoxHeight(box.offsetHeight);
+      });
+    };
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(box);
+    window.addEventListener("resize", measure);
+    document.addEventListener("fullscreenchange", measure);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", measure);
+      document.removeEventListener("fullscreenchange", measure);
+    };
+  }, []);
+
+  useEffect(() => {
+    const box = container.current;
+    if (!box) return;
+
+    function toggleVideoPlay(videoContainer: HTMLDivElement) {
+      const openVideo = videoContainer.getElementsByTagName("video");
+      if (openVideo.length > 0) {
+        const rect = openVideo[0].getBoundingClientRect();
+        if (Math.abs(rect.x) < document.body.clientWidth / 2) {
+          openVideo[0].play();
+        } else {
+          openVideo[0].pause();
         }
       }
     }
 
-    setTimeout(() => {
-      toggleVideoPlay();
+    const timeout = window.setTimeout(() => {
+      toggleVideoPlay(box);
     }, 250);
-  }, [container]);
+
+    return () => window.clearTimeout(timeout);
+  }, [current, src]);
 
   useEffect(() => {
     if (dimensionsProvided) {
