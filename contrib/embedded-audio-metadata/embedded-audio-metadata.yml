@@ -1,0 +1,22 @@
+name: Embedded Audio Metadata
+description: Preview and safely import embedded MP3 metadata into native Stash Audio records.
+version: 0.1.1
+url: https://github.com/Ralkero/stash-native-audio
+exec:
+  - python
+  - "{pluginDir}/embedded_audio_metadata.py"
+interface: raw
+tasks:
+  - name: Preview Metadata Import
+    description: Read MP3 tags and write a review report without changing Stash or the source files.
+    defaultArgs:
+      mode: preview
+  - name: Apply Reviewed Import
+    description: Apply the latest unchanged preview, create approved missing Authors, and preserve manual edits.
+    defaultArgs:
+      mode: apply
+      approve_create_authors: true
+  - name: Resolve Conflicts
+    description: Apply per-field Keep Stash or Use File choices from state/conflict_choices.json.
+    defaultArgs:
+      mode: resolve

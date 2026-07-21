@@ -1,5 +1,8 @@
 # Stash
 
+> [!WARNING]
+> This branch is an experimental Stash v0.31.1 fork that adds a first-class native Audio library. It introduces database schema 86 and must not be used without a current database backup. See [Native Audio](docs/NATIVE_AUDIO.md) for scope, setup, compatibility, and rollback guidance.
+
 [![Build](https://github.com/stashapp/stash/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/stashapp/stash/actions/workflows/build.yml)
 [![Docker pulls](https://img.shields.io/docker/pulls/stashapp/stash.svg)](https://hub.docker.com/r/stashapp/stash 'DockerHub')
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/stashapp?logo=github)](https://github.com/sponsors/stashapp)
