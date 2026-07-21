@@ -27,6 +27,7 @@ import {
   faChartColumn,
   faFilm,
   faHeart,
+  faHeadphones,
   faImage,
   faImages,
   faMapMarkerAlt,
@@ -53,6 +54,10 @@ const messages = defineMessages({
   scenes: {
     id: "scenes",
     defaultMessage: "Scenes",
+  },
+  audios: {
+    id: "audios",
+    defaultMessage: "Audio",
   },
   images: {
     id: "images",
@@ -104,6 +109,13 @@ const allMenuItems: IMenuItem[] = [
     icon: faPlayCircle,
     hotkey: "g s",
     userCreatable: true,
+  },
+  {
+    name: "audios",
+    message: messages.audios,
+    href: "/audios",
+    icon: faHeadphones,
+    hotkey: "g a",
   },
   {
     name: "images",
@@ -189,9 +201,15 @@ export const MainNavbar: React.FC = () => {
 
   // Show all menu items by default, unless config says otherwise
   const menuItems = useMemo(() => {
+    const enabled = (items: IMenuItem[]) =>
+      items.filter(
+        (item) =>
+          item.name !== "audios" ||
+          configuration?.general.enableAudioLibrary
+      );
     let cfgMenuItems = configuration?.interface.menuItems;
     if (!cfgMenuItems) {
-      return allMenuItems;
+      return enabled(allMenuItems);
     }
 
     // translate old movies menu item to groups
@@ -202,8 +220,8 @@ export const MainNavbar: React.FC = () => {
       return item;
     });
 
-    return allMenuItems.filter((menuItem) =>
-      cfgMenuItems!.includes(menuItem.name)
+    return enabled(
+      allMenuItems.filter((menuItem) => cfgMenuItems!.includes(menuItem.name))
     );
   }, [configuration]);
 

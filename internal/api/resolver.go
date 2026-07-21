@@ -49,6 +49,7 @@ func (r *Resolver) scraperCache() *scraper.Cache {
 func (r *Resolver) Gallery() GalleryResolver {
 	return &galleryResolver{r}
 }
+func (r *Resolver) Audio() AudioResolver { return &audioResolver{r} }
 func (r *Resolver) GalleryChapter() GalleryChapterResolver {
 	return &galleryChapterResolver{r}
 }
@@ -93,6 +94,9 @@ func (r *Resolver) GalleryFile() GalleryFileResolver {
 func (r *Resolver) VideoFile() VideoFileResolver {
 	return &videoFileResolver{r}
 }
+func (r *Resolver) AudioFile() AudioFileResolver {
+	return &audioFileResolver{r}
+}
 func (r *Resolver) ImageFile() ImageFileResolver {
 	return &imageFileResolver{r}
 }
@@ -117,6 +121,8 @@ type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 
 type galleryResolver struct{ *Resolver }
+type audioResolver struct{ *Resolver }
+type audioFileResolver struct{ *Resolver }
 type galleryChapterResolver struct{ *Resolver }
 type performerResolver struct{ *Resolver }
 type sceneResolver struct{ *Resolver }

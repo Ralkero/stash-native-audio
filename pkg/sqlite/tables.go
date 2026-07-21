@@ -31,6 +31,11 @@ var (
 	scenesURLsJoinTable       = goqu.T(scenesURLsTable)
 	scenesCustomFieldsTable   = goqu.T("scene_custom_fields")
 
+	audiosFilesJoinTable    = goqu.T("audios_files")
+	audiosAuthorsJoinTable  = goqu.T("groups_audios")
+	audiosTagsJoinTable     = goqu.T("audios_tags")
+	audiosCustomFieldsTable = goqu.T("audio_custom_fields")
+
 	sceneMarkersTagsJoinTable = goqu.T(sceneMarkersTagsTable)
 
 	performersAliasesJoinTable  = goqu.T(performersAliasesTable)
@@ -57,6 +62,18 @@ var (
 )
 
 var (
+	audioTableMgr = &table{
+		table:    goqu.T(audioTable),
+		idColumn: goqu.T(audioTable).Col(idColumn),
+	}
+
+	audiosFilesTableMgr = &relatedFilesTable{
+		table: table{
+			table:    audiosFilesJoinTable,
+			idColumn: audiosFilesJoinTable.Col(audioIDColumn),
+		},
+	}
+
 	imageTableMgr = &table{
 		table:    goqu.T(imageTable),
 		idColumn: goqu.T(imageTable).Col(idColumn),
@@ -255,6 +272,11 @@ var (
 	videoFileTableMgr = &table{
 		table:    goqu.T(videoFileTable),
 		idColumn: goqu.T(videoFileTable).Col(fileIDColumn),
+	}
+
+	audioFileTableMgr = &table{
+		table:    goqu.T(audioFileTable),
+		idColumn: goqu.T(audioFileTable).Col(fileIDColumn),
 	}
 
 	imageFileTableMgr = &table{

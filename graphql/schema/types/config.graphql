@@ -165,6 +165,10 @@ input ConfigGeneralInput {
   galleryCoverRegex: String
   "Array of video file extensions"
   videoExtensions: [String!]
+  "Enable the native audio library. Disabled by default until the database is backed up and migrated."
+  enableAudioLibrary: Boolean
+  "Array of native audio file extensions"
+  audioExtensions: [String!]
   "Array of image file extensions"
   imageExtensions: [String!]
   "Array of gallery zip file extensions"
@@ -173,6 +177,8 @@ input ConfigGeneralInput {
   excludes: [String!]
   "Array of file regexp to exclude from Image Scans"
   imageExcludes: [String!]
+  "Array of file regexp to exclude from Audio Scans"
+  audioExcludes: [String!]
   "Custom Performer Image Location"
   customPerformerImageLocation: String
   "Stash-box instances used for tagging"
@@ -311,6 +317,10 @@ type ConfigGeneralResult {
   spriteScreenshotSize: Int!
   "Array of video file extensions"
   videoExtensions: [String!]!
+  "Whether the native audio library is enabled"
+  enableAudioLibrary: Boolean!
+  "Array of native audio file extensions"
+  audioExtensions: [String!]!
   "Array of image file extensions"
   imageExtensions: [String!]!
   "Array of gallery zip file extensions"
@@ -323,6 +333,7 @@ type ConfigGeneralResult {
   excludes: [String!]!
   "Array of file regexp to exclude from Image Scans"
   imageExcludes: [String!]!
+  audioExcludes: [String!]!
   "Custom Performer Image Location"
   customPerformerImageLocation: String
   "Stash-box instances used for tagging"

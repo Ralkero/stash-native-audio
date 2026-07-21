@@ -37,6 +37,24 @@ export const SettingsLibraryPanel: React.FC = () => {
       />
 
       <SettingSection headingID="config.library.media_content_extensions">
+        <BooleanSetting
+          id="enable-audio-library"
+          heading="Enable native audio library"
+          subHeading="Indexes MP3 files as Audio items after the required database migration. Back up the database before enabling this option."
+          checked={general.enableAudioLibrary ?? false}
+          onChange={(v) => saveGeneral({ enableAudioLibrary: v })}
+        />
+
+        <StringSetting
+          id="audio-extensions"
+          heading="Audio extensions"
+          subHeading="Comma-separated native audio extensions. Version 1 supports MP3."
+          value={listToCommaDelimited(general.audioExtensions ?? undefined)}
+          onChange={(v) =>
+            saveGeneral({ audioExtensions: commaDelimitedToList(v) })
+          }
+        />
+
         <StringSetting
           id="video-extensions"
           headingID="config.general.video_ext_head"
@@ -103,6 +121,15 @@ export const SettingsLibraryPanel: React.FC = () => {
           value={general.imageExcludes ?? undefined}
           onChange={(v) => saveGeneral({ imageExcludes: v })}
           defaultNewValue="sample\.jpg$"
+        />
+
+        <StringListSetting
+          id="excluded-audio-patterns"
+          heading="Excluded audio patterns"
+          subHeading="Regular expressions for folders or MP3 files that native audio scans should ignore."
+          value={general.audioExcludes ?? undefined}
+          onChange={(v) => saveGeneral({ audioExcludes: v })}
+          defaultNewValue="sample\.mp3$"
         />
       </SettingSection>
 

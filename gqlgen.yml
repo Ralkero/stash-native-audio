@@ -44,6 +44,12 @@ models:
         fieldName: DurationFinite
       frame_rate:
         fieldName: FrameRateFinite
+  Audio:
+    fields:
+      genres:
+        resolver: true
+      descriptors:
+        resolver: true
   # movie is group under the hood
   Movie:
     model: github.com/stashapp/stash/pkg/models.Group

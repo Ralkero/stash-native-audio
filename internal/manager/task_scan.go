@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/remeh/sizedwaitgroup"
 	"github.com/stashapp/stash/internal/manager/config"
+	native_audio "github.com/stashapp/stash/pkg/audio"
 	"github.com/stashapp/stash/pkg/file"
 	"github.com/stashapp/stash/pkg/file/video"
 	"github.com/stashapp/stash/pkg/fsutil"
@@ -422,6 +423,7 @@ func (j *ScanJob) scanZipFile(ctx context.Context, f file.ScannedFile, progress 
 
 type extensionConfig struct {
 	vidExt []string
+	audExt []string
 	imgExt []string
 	zipExt []string
 }
@@ -429,6 +431,7 @@ type extensionConfig struct {
 func newExtensionConfig(c *config.Config) extensionConfig {
 	return extensionConfig{
 		vidExt: c.GetVideoExtensions(),
+		audExt: c.GetAudioExtensions(),
 		imgExt: c.GetImageExtensions(),
 		zipExt: c.GetGalleryExtensions(),
 	}
@@ -453,6 +456,7 @@ type handlerRequiredFilter struct {
 	extensionConfig
 	txnManager    txn.Manager
 	SceneFinder   sceneFinder
+	AudioFinder   fileCounter
 	ImageFinder   fileCounter
 	GalleryFinder galleryFinder
 
@@ -468,6 +472,7 @@ func newHandlerRequiredFilter(c *config.Config, repo models.Repository) *handler
 		extensionConfig:          newExtensionConfig(c),
 		txnManager:               repo.TxnManager,
 		SceneFinder:              repo.Scene,
+		AudioFinder:              repo.Audio,
 		ImageFinder:              repo.Image,
 		GalleryFinder:            repo.Gallery,
 		FolderCache:              lru.New[bool](processes * 2),
@@ -478,6 +483,7 @@ func newHandlerRequiredFilter(c *config.Config, repo models.Repository) *handler
 func (f *handlerRequiredFilter) Accept(ctx context.Context, ff models.File) bool {
 	path := ff.Base().Path
 	isVideoFile := useAsVideo(path)
+	isAudioFile := isAudio(path)
 	isImageFile := useAsImage(path)
 	isZipFile := fsutil.MatchExtension(path, f.zipExt)
 
@@ -487,6 +493,8 @@ func (f *handlerRequiredFilter) Accept(ctx context.Context, ff models.File) bool
 	case isVideoFile:
 		// return true if there are no scenes associated
 		counter = f.SceneFinder
+	case isAudioFile:
+		counter = f.AudioFinder
 	case isImageFile:
 		counter = f.ImageFinder
 	case isZipFile:
@@ -555,6 +563,7 @@ type scanFilter struct {
 	generatedPath     string
 	videoExcludeRegex []*regexp.Regexp
 	imageExcludeRegex []*regexp.Regexp
+	audioExcludeRegex []*regexp.Regexp
 	minModTime        time.Time
 	stashIgnoreFilter *file.StashIgnoreFilter
 }
@@ -567,6 +576,7 @@ func newScanFilter(c *config.Config, repo models.Repository, minModTime time.Tim
 		generatedPath:     c.GetGeneratedPath(),
 		videoExcludeRegex: generateRegexps(c.GetExcludes()),
 		imageExcludeRegex: generateRegexps(c.GetImageExcludes()),
+		audioExcludeRegex: generateRegexps(c.GetAudioExcludes()),
 		minModTime:        minModTime,
 		stashIgnoreFilter: file.NewStashIgnoreFilter(),
 	}
@@ -596,10 +606,11 @@ func (f *scanFilter) Accept(ctx context.Context, path string, info fs.FileInfo, 
 	}
 
 	isVideoFile := useAsVideo(path)
+	isAudioFile := isAudio(path)
 	isImageFile := useAsImage(path)
 	isZipFile := fsutil.MatchExtension(path, f.zipExt)
 
-	if !info.IsDir() && !isVideoFile && !isImageFile && !isZipFile {
+	if !info.IsDir() && !isVideoFile && !isAudioFile && !isImageFile && !isZipFile {
 		logger.Debugf("Skipping %s as it does not match any known file extensions", path)
 		return false
 	}
@@ -613,7 +624,7 @@ func (f *scanFilter) Accept(ctx context.Context, path string, info fs.FileInfo, 
 	// shortcut: skip the directory entirely if it matches both exclusion patterns
 	// add a trailing separator so that it correctly matches against patterns like path/.*
 	pathExcludeTest := path + string(filepath.Separator)
-	if (matchFileRegex(pathExcludeTest, f.videoExcludeRegex)) && (s.ExcludeImage || matchFileRegex(pathExcludeTest, f.imageExcludeRegex)) {
+	if matchFileRegex(pathExcludeTest, f.videoExcludeRegex) && (s.ExcludeImage || matchFileRegex(pathExcludeTest, f.imageExcludeRegex)) && matchFileRegex(pathExcludeTest, f.audioExcludeRegex) {
 		logger.Debugf("Skipping directory %s as it matches video and image exclusion patterns", path)
 		return false
 	}
@@ -623,6 +634,9 @@ func (f *scanFilter) Accept(ctx context.Context, path string, info fs.FileInfo, 
 		return false
 	} else if (isImageFile || isZipFile) && (s.ExcludeImage || matchFileRegex(path, f.imageExcludeRegex)) {
 		logger.Debugf("Skipping %s as it matches image exclusion patterns", path)
+		return false
+	} else if isAudioFile && matchFileRegex(path, f.audioExcludeRegex) {
+		logger.Debugf("Skipping %s as it matches audio exclusion patterns", path)
 		return false
 	}
 
@@ -648,6 +662,8 @@ func imageFileFilter(ctx context.Context, f models.File) bool {
 	return useAsImage(f.Base().Path)
 }
 
+func audioFileFilter(ctx context.Context, f models.File) bool { return isAudio(f.Base().Path) }
+
 func galleryFileFilter(ctx context.Context, f models.File) bool {
 	return isZip(f.Base().Basename)
 }
@@ -659,6 +675,10 @@ func getScanHandlers(options ScanMetadataInput, taskQueue *job.TaskQueue, progre
 	pluginCache := mgr.PluginCache
 
 	return []file.Handler{
+		&file.FilteredHandler{
+			Filter:  file.FilterFunc(audioFileFilter),
+			Handler: &native_audio.ScanHandler{CreatorUpdater: r.Audio},
+		},
 		&file.FilteredHandler{
 			Filter: file.FilterFunc(imageFileFilter),
 			Handler: &image.ScanHandler{

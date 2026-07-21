@@ -47,10 +47,13 @@ fragment ConfigGeneralData on ConfigGeneralResult {
   createGalleriesFromFolders
   galleryCoverRegex
   videoExtensions
+  enableAudioLibrary
+  audioExtensions
   imageExtensions
   galleryExtensions
   excludes
   imageExcludes
+  audioExcludes
   customPerformerImageLocation
   stashBoxes {
     name

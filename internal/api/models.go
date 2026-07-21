@@ -38,6 +38,8 @@ func convertBaseFile(f models.File) BaseFile {
 		return f
 	case *models.VideoFile:
 		return &VideoFile{VideoFile: f}
+	case *models.AudioFile:
+		return &AudioFile{AudioFile: f}
 	case *models.ImageFile:
 		return &ImageFile{ImageFile: f}
 	case *models.BaseFile:
@@ -65,6 +67,16 @@ func (f *GalleryFile) Fingerprints() []models.Fingerprint {
 
 type VideoFile struct {
 	*models.VideoFile
+}
+
+type AudioFile struct {
+	*models.AudioFile
+}
+
+func (AudioFile) IsBaseFile() {}
+
+func (f *AudioFile) Fingerprints() []models.Fingerprint {
+	return f.AudioFile.Fingerprints
 }
 
 func (VideoFile) IsBaseFile() {}

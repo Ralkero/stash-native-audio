@@ -379,8 +379,22 @@ func (r *mutationResolver) ConfigureGeneral(ctx context.Context, input ConfigGen
 		c.SetInterface(config.ImageExclude, input.ImageExcludes)
 	}
 
+	if input.AudioExcludes != nil {
+		for _, r := range input.AudioExcludes {
+			if _, err := regexp.Compile(r); err != nil {
+				return nil, fmt.Errorf("invalid audio exclude regex %q: %w", r, err)
+			}
+		}
+		c.SetInterface(config.AudioExclude, input.AudioExcludes)
+	}
+
 	if input.VideoExtensions != nil {
 		c.SetInterface(config.VideoExtensions, input.VideoExtensions)
+	}
+
+	r.setConfigBool(config.EnableAudioLibrary, input.EnableAudioLibrary)
+	if input.AudioExtensions != nil {
+		c.SetInterface(config.AudioExtensions, input.AudioExtensions)
 	}
 
 	if input.ImageExtensions != nil {

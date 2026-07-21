@@ -5,6 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import viteCompression from "vite-plugin-compression";
 
 const nolegacy = process.env.VITE_APP_NOLEGACY === "true";
+const nocompress = process.env.VITE_APP_NOCOMPRESS === "true";
 const sourcemap = process.env.VITE_APP_SOURCEMAPS === "true";
 
 // https://vitejs.dev/config/
@@ -16,13 +17,16 @@ export default defineConfig(() => {
       },
     }),
     tsconfigPaths(),
-    viteCompression({
+  ];
+
+  if (!nocompress) {
+    plugins.push(viteCompression({
       algorithm: "gzip",
       deleteOriginFile: true,
       threshold: 0,
       filter: /\.(js|json|css|svg|md)$/i,
-    }),
-  ];
+    }));
+  }
 
   if (!nolegacy) {
     plugins = [...plugins, legacy()];

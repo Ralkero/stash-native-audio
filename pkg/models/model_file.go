@@ -291,6 +291,35 @@ type VideoFile struct {
 	InteractiveSpeed *int `json:"interactive_speed"`
 }
 
+// AudioFile is an extension of BaseFile for files whose primary media stream
+// is audio. It deliberately does not implement VisualFile so scene, image and
+// variant code cannot accidentally treat native audio as video.
+type AudioFile struct {
+	*BaseFile
+	Format     string  `json:"format"`
+	Duration   float64 `json:"duration"`
+	AudioCodec string  `json:"audio_codec"`
+	BitRate    int64   `json:"bitrate"`
+	SampleRate int     `json:"sample_rate"`
+	Channels   int     `json:"channels"`
+	BitDepth   int     `json:"bit_depth"`
+}
+
+func (f AudioFile) Clone() (ret File) {
+	clone := f
+	clone.BaseFile = f.BaseFile.Clone().(*BaseFile)
+	ret = &clone
+	return
+}
+
+func (f AudioFile) DurationFinite() float64 {
+	ret := f.Duration
+	if math.IsInf(ret, 0) || math.IsNaN(ret) {
+		return 0
+	}
+	return ret
+}
+
 func (f VideoFile) GetWidth() int {
 	return f.Width
 }

@@ -1,0 +1,95 @@
+type AudioPaths {
+  stream: String!
+  cover: String
+}
+
+type Audio {
+  id: ID!
+  title: String
+  album: String
+  grouping: String
+  details: String
+  audience: String
+  content_type: String
+  rating100: Int
+  organized: Boolean!
+  resume_time: Float!
+  play_duration: Float!
+  play_count: Int!
+  last_played_at: Time
+  created_at: Time!
+  updated_at: Time!
+  files: [AudioFile!]!
+  paths: AudioPaths!
+  has_cover: Boolean!
+  authors: [Group!]!
+  tags: [Tag!]!
+  genres: [String!]!
+  descriptors: [String!]!
+  custom_fields: Map!
+}
+
+input AudioCreateInput {
+  title: String
+  album: String
+  grouping: String
+  details: String
+  audience: String
+  content_type: String
+  rating100: Int
+  organized: Boolean
+  author_ids: [ID!]
+  tag_ids: [ID!]
+  genres: [String!]
+  descriptors: [String!]
+  "The first file is assigned as primary. Every file must be an AudioFile."
+  file_ids: [ID!]
+  "A URL or base64 encoded data URL"
+  cover_image: String
+  custom_fields: Map
+}
+
+input AudioUpdateInput {
+  clientMutationId: String
+  id: ID!
+  title: String
+  album: String
+  grouping: String
+  details: String
+  audience: String
+  content_type: String
+  rating100: Int
+  organized: Boolean
+  author_ids: [ID!]
+  tag_ids: [ID!]
+  genres: [String!]
+  descriptors: [String!]
+  primary_file_id: ID
+  resume_time: Float
+  play_duration: Float
+  "A URL or base64 encoded data URL"
+  cover_image: String
+  custom_fields: CustomFieldsInput
+}
+
+input AudioFilterType {
+  title: StringCriterionInput
+  album: StringCriterionInput
+  grouping: StringCriterionInput
+  audience: StringCriterionInput
+  content_type: StringCriterionInput
+  path: StringCriterionInput
+  genre: StringCriterionInput
+  descriptor: StringCriterionInput
+  authors: MultiCriterionInput
+  rating100: IntCriterionInput
+  organized: Boolean
+  duration: IntCriterionInput
+}
+
+type FindAudiosResultType {
+  count: Int!
+  duration: Float!
+  filesize: Float!
+  audios: [Audio!]!
+}

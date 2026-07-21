@@ -1,5 +1,10 @@
 "The query root for this schema"
 type Query {
+
+  "Find a native audio item by ID"
+  findAudio(id: ID!): Audio
+  "Query native audio items"
+  findAudios(audio_filter: AudioFilterType, filter: FindFilterType, ids: [ID!]): FindAudiosResultType!
   # Filters
   findSavedFilter(id: ID!): SavedFilter
   findSavedFilters(mode: FilterMode): [SavedFilter!]!
@@ -283,6 +288,12 @@ type Mutation {
 
   "Migrates the schema to the required version. Returns the job ID"
   migrate(input: MigrateInput!): ID!
+
+  audioCreate(input: AudioCreateInput!): Audio
+  audioUpdate(input: AudioUpdateInput!): Audio
+  audioDestroy(id: ID!): Boolean!
+  audioSaveActivity(id: ID!, resume_time: Float, playDuration: Float): Boolean!
+  audioIncrementPlayCount(id: ID!): Int!
 
   "Downloads and installs ffmpeg and ffprobe binaries into the configuration directory. Returns the job ID."
   downloadFFMpeg: ID!
