@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -173,10 +174,11 @@ type audioFileQueryRow struct {
 	SampleRate null.Int    `db:"sample_rate"`
 	Channels   null.Int    `db:"channels"`
 	BitDepth   null.Int    `db:"bit_depth"`
+	Waveform   null.String `db:"audio_waveform"`
 }
 
 func (f *audioFileQueryRow) resolve() *models.AudioFile {
-	return &models.AudioFile{
+	ret := &models.AudioFile{
 		Format:     f.Format.String,
 		Duration:   f.Duration.Float64,
 		AudioCodec: f.AudioCodec.String,
@@ -185,6 +187,10 @@ func (f *audioFileQueryRow) resolve() *models.AudioFile {
 		Channels:   int(f.Channels.Int64),
 		BitDepth:   int(f.BitDepth.Int64),
 	}
+	if f.Waveform.Valid {
+		_ = json.Unmarshal([]byte(f.Waveform.String), &ret.Waveform)
+	}
+	return ret
 }
 
 func audioFileQueryColumns() []interface{} {
@@ -198,6 +204,7 @@ func audioFileQueryColumns() []interface{} {
 		table.Col("sample_rate"),
 		table.Col("channels"),
 		table.Col("bit_depth"),
+		table.Col("waveform").As("audio_waveform"),
 	}
 }
 
@@ -472,6 +479,23 @@ func (qb *FileStore) Update(ctx context.Context, f models.File) error {
 		return err
 	}
 
+	return nil
+}
+
+// UpdateAudioWaveform updates cached waveform peaks independently of normal
+// file updates, preventing scans from clearing a previously generated cache.
+func (qb *FileStore) UpdateAudioWaveform(ctx context.Context, fileID models.FileID, waveform []float64) error {
+	encoded, err := json.Marshal(waveform)
+	if err != nil {
+		return fmt.Errorf("encoding audio waveform: %w", err)
+	}
+
+	q := dialect.Update(audioFileTable).Prepared(true).
+		Set(goqu.Record{"waveform": string(encoded)}).
+		Where(goqu.Ex{fileIDColumn: fileID})
+	if _, err := exec(ctx, q); err != nil {
+		return fmt.Errorf("updating audio waveform: %w", err)
+	}
 	return nil
 }
 

@@ -85,6 +85,7 @@ type FileWriter interface {
 	FileFingerprintWriter
 
 	UpdateCaptions(ctx context.Context, fileID FileID, captions []*VideoCaption) error
+	UpdateAudioWaveform(ctx context.Context, fileID FileID, waveform []float64) error
 }
 
 // FileReaderWriter provides all file methods.

@@ -176,6 +176,14 @@ export const GenerateOptions: React.FC<IGenerateOptions> = ({
           />
         </>
       )}
+      {!type && (
+        <BooleanSetting
+          id="audio-waveforms"
+          checked={options.audioWaveforms ?? false}
+          heading="Audio waveforms"
+          onChange={(v) => setOptions({ audioWaveforms: v })}
+        />
+      )}
       <BooleanSetting
         id="overwrite"
         checked={options.overwrite ?? false}

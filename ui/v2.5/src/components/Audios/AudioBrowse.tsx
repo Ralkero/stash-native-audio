@@ -3,6 +3,7 @@ import { gql, useQuery } from "@apollo/client";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { LoadingIndicator } from "../Shared/LoadingIndicator";
+import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 
 const QUERY = gql`
   query NativeAudioBrowse($filter: FindFilterType) {
@@ -27,6 +28,7 @@ const QUERY = gql`
           duration
           audio_codec
           bitrate: bit_rate
+          waveform
         }
         paths {
           stream
@@ -51,6 +53,7 @@ type AudioSummary = {
     duration: number;
     audio_codec: string;
     bitrate: number;
+    waveform: number[];
   }[];
   paths: { stream: string; cover?: string };
 };
@@ -142,11 +145,11 @@ export const AudioBrowse: React.FC = () => {
                     <span>{duration(audio.files[0].duration)}</span>
                   )}
                 </div>
-                <audio
-                  className="w-100 mt-3"
-                  controls
-                  preload="metadata"
+                <AudioWaveformPlayer
+                  compact
                   src={audio.paths.stream}
+                  durationHint={audio.files[0]?.duration}
+                  peaks={audio.files[0]?.waveform}
                 />
                 <div className="mt-2">
                   {audio.genres.slice(0, 5).map((genre) => (

@@ -363,6 +363,20 @@ func (_m *FileReaderWriter) Update(ctx context.Context, f models.File) error {
 	return r0
 }
 
+// UpdateAudioWaveform provides a mock function with given fields: ctx, fileID, waveform
+func (_m *FileReaderWriter) UpdateAudioWaveform(ctx context.Context, fileID models.FileID, waveform []float64) error {
+	ret := _m.Called(ctx, fileID, waveform)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.FileID, []float64) error); ok {
+		r0 = rf(ctx, fileID, waveform)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateCaptions provides a mock function with given fields: ctx, fileID, captions
 func (_m *FileReaderWriter) UpdateCaptions(ctx context.Context, fileID models.FileID, captions []*models.VideoCaption) error {
 	ret := _m.Called(ctx, fileID, captions)

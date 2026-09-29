@@ -296,13 +296,14 @@ type VideoFile struct {
 // variant code cannot accidentally treat native audio as video.
 type AudioFile struct {
 	*BaseFile
-	Format     string  `json:"format"`
-	Duration   float64 `json:"duration"`
-	AudioCodec string  `json:"audio_codec"`
-	BitRate    int64   `json:"bitrate"`
-	SampleRate int     `json:"sample_rate"`
-	Channels   int     `json:"channels"`
-	BitDepth   int     `json:"bit_depth"`
+	Format     string    `json:"format"`
+	Duration   float64   `json:"duration"`
+	AudioCodec string    `json:"audio_codec"`
+	BitRate    int64     `json:"bitrate"`
+	SampleRate int       `json:"sample_rate"`
+	Channels   int       `json:"channels"`
+	BitDepth   int       `json:"bit_depth"`
+	Waveform   []float64 `json:"waveform"`
 }
 
 func (f AudioFile) Clone() (ret File) {

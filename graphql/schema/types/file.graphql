@@ -121,6 +121,7 @@ type AudioFile implements BaseFile {
   sample_rate: Int!
   channels: Int!
   bit_depth: Int!
+  waveform: [Float!]!
 
   created_at: Time!
   updated_at: Time!

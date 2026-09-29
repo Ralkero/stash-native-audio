@@ -3,6 +3,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { Button, Form } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { LoadingIndicator } from "../Shared/LoadingIndicator";
+import { AudioWaveformPlayer } from "./AudioWaveformPlayer";
 
 const QUERY = gql`
   query NativeAudioDetail($id: ID!) {
@@ -37,6 +38,7 @@ const QUERY = gql`
         sample_rate
         channels
         bit_depth
+        waveform
       }
       paths {
         stream
@@ -97,6 +99,7 @@ type Detail = {
     sample_rate: number;
     channels: number;
     bit_depth: number;
+    waveform: number[];
   }[];
   paths: { stream: string; cover?: string };
   custom_fields: Record<string, unknown>;
@@ -214,22 +217,15 @@ export const AudioDetails: React.FC<RouteComponentProps<{ id: string }>> = ({
             <img className="audio-cover" src={a.paths.cover} alt="Cover" />
           )}
         </div>
-        <audio
-          className="w-100 my-4"
-          controls
-          preload="metadata"
+        <AudioWaveformPlayer
           src={a.paths.stream}
+          durationHint={a.files[0]?.duration}
+          peaks={a.files[0]?.waveform}
           loop={loop}
           autoPlay={
             new URLSearchParams(location.search).get("autoplay") === "true"
           }
-          onLoadedMetadata={(e) => {
-            if (
-              a.resume_time > 0 &&
-              a.resume_time < e.currentTarget.duration - 2
-            )
-              e.currentTarget.currentTime = a.resume_time;
-          }}
+          initialTime={a.resume_time}
           onPlay={() => {
             playStarted.current = Date.now();
             if (!playCounted.current) {
@@ -237,14 +233,14 @@ export const AudioDetails: React.FC<RouteComponentProps<{ id: string }>> = ({
               incrementPlay({ variables: { id: a.id } });
             }
           }}
-          onTimeUpdate={(e) => {
+          onTimeUpdate={(player) => {
             if (Date.now() - lastResumeSave.current > 5000) {
               lastResumeSave.current = Date.now();
-              recordActivity(e.currentTarget, false);
+              recordActivity(player, false);
             }
           }}
-          onPause={(e) => recordActivity(e.currentTarget, true)}
-          onEnded={(e) => recordActivity(e.currentTarget, true)}
+          onPause={(player) => recordActivity(player, true)}
+          onEnded={(player) => recordActivity(player, true)}
         />
         <Form.Check
           type="checkbox"
