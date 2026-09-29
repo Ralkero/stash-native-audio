@@ -32,8 +32,6 @@ var (
 	scenesCustomFieldsTable   = goqu.T("scene_custom_fields")
 
 	audiosFilesJoinTable    = goqu.T("audios_files")
-	audiosAuthorsJoinTable  = goqu.T("groups_audios")
-	audiosTagsJoinTable     = goqu.T("audios_tags")
 	audiosCustomFieldsTable = goqu.T("audio_custom_fields")
 
 	sceneMarkersTagsJoinTable = goqu.T(sceneMarkersTagsTable)

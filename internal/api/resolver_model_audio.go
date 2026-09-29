@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stashapp/stash/internal/api/urlbuilders"
 	"github.com/stashapp/stash/pkg/models"
@@ -84,10 +83,3 @@ func (r *audioResolver) CustomFields(ctx context.Context, obj *models.Audio) (re
 	return ret, err
 }
 
-func convertAudioFile(f models.File) (*models.AudioFile, error) {
-	a, ok := f.(*models.AudioFile)
-	if !ok {
-		return nil, fmt.Errorf("file %T is not an audio file", f)
-	}
-	return a, nil
-}
