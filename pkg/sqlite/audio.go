@@ -49,7 +49,7 @@ type audioRow struct {
 	// built from a models.Audio value, which intentionally does not load the
 	// cover blob; including this field in a normal UPDATE would therefore erase
 	// an existing cover whenever any metadata field changes.
-	CoverBlob    zero.String   `db:"cover_blob" goqu:"skipupdate"`
+	CoverBlob zero.String `db:"cover_blob" goqu:"skipupdate"`
 }
 
 func (r *audioRow) fromAudio(a models.Audio) {

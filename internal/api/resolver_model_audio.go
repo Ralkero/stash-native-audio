@@ -81,4 +81,3 @@ func (r *audioResolver) CustomFields(ctx context.Context, obj *models.Audio) (re
 	})
 	return ret, err
 }
-
