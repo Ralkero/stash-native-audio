@@ -1,10 +1,13 @@
 "The query root for this schema"
 type Query {
-
   "Find a native audio item by ID"
   findAudio(id: ID!): Audio
   "Query native audio items"
-  findAudios(audio_filter: AudioFilterType, filter: FindFilterType, ids: [ID!]): FindAudiosResultType!
+  findAudios(
+    audio_filter: AudioFilterType
+    filter: FindFilterType
+    ids: [ID!]
+  ): FindAudiosResultType!
   # Filters
   findSavedFilter(id: ID!): SavedFilter
   findSavedFilters(mode: FilterMode): [SavedFilter!]!

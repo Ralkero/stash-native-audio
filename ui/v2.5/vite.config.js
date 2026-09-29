@@ -20,12 +20,14 @@ export default defineConfig(() => {
   ];
 
   if (!nocompress) {
-    plugins.push(viteCompression({
-      algorithm: "gzip",
-      deleteOriginFile: true,
-      threshold: 0,
-      filter: /\.(js|json|css|svg|md)$/i,
-    }));
+    plugins.push(
+      viteCompression({
+        algorithm: "gzip",
+        deleteOriginFile: true,
+        threshold: 0,
+        filter: /\.(js|json|css|svg|md)$/i,
+      })
+    );
   }
 
   if (!nolegacy) {
