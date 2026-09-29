@@ -3,7 +3,7 @@ import { getClient } from "./core/StashService";
 
 export type StashAudioQueueItem = { kind: "audio"; id: string };
 
-export interface StashAudioAPI {
+export interface IStashAudioAPI {
   version: "1.0";
   route: "/audios";
   open(id: string): void;
@@ -12,7 +12,7 @@ export interface StashAudioAPI {
   addToQueue(ids: string[]): void;
 }
 
-const api: StashAudioAPI = {
+const api: IStashAudioAPI = {
   version: "1.0",
   route: "/audios",
   open(id) {
@@ -20,8 +20,18 @@ const api: StashAudioAPI = {
     window.dispatchEvent(new PopStateEvent("popstate"));
   },
   async play(id) {
-    const result = await getClient().query<{ findAudio: { paths: { stream: string } } }>({
-      query: gql`query StashAudioPlay($id: ID!) { findAudio(id: $id) { paths { stream } } }`,
+    const result = await getClient().query<{
+      findAudio: { paths: { stream: string } };
+    }>({
+      query: gql`
+        query StashAudioPlay($id: ID!) {
+          findAudio(id: $id) {
+            paths {
+              stream
+            }
+          }
+        }
+      `,
       variables: { id },
       fetchPolicy: "network-only",
     });
@@ -29,18 +39,32 @@ const api: StashAudioAPI = {
     await player.play();
     return player;
   },
-  isAudioRoute() { return window.location.pathname.includes("/audios"); },
+  isAudioRoute() {
+    return window.location.pathname.includes("/audios");
+  },
   addToQueue(ids) {
-    const queue = (window as Window & { StashSessionQueue?: { addAudioMany?: (ids: string[]) => unknown } }).StashSessionQueue;
+    const queue = (
+      window as Window & {
+        StashSessionQueue?: { addAudioMany?: (ids: string[]) => unknown };
+      }
+    ).StashSessionQueue;
     if (queue?.addAudioMany) {
       queue.addAudioMany(ids);
       return;
     }
-    window.dispatchEvent(new CustomEvent("stash:audio:add-to-queue", {
-      detail: ids.map((id): StashAudioQueueItem => ({ kind: "audio", id })),
-    }));
+    window.dispatchEvent(
+      new CustomEvent("stash:audio:add-to-queue", {
+        detail: ids.map((id): StashAudioQueueItem => ({ kind: "audio", id })),
+      })
+    );
   },
 };
 
-declare global { interface Window { StashAudio: StashAudioAPI } }
+declare global {
+  // This must retain the DOM's global interface name for declaration merging.
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    StashAudio: IStashAudioAPI;
+  }
+}
 window.StashAudio = api;
