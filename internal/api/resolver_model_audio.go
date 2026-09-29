@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stashapp/stash/internal/api/urlbuilders"
 	"github.com/stashapp/stash/pkg/models"
@@ -39,7 +38,6 @@ func (r *audioResolver) HasCover(ctx context.Context, obj *models.Audio) (ret bo
 	})
 	return ret, err
 }
-
 func (r *audioResolver) Rating100(ctx context.Context, obj *models.Audio) (*int, error) {
 	return obj.Rating, nil
 }
@@ -82,12 +80,4 @@ func (r *audioResolver) CustomFields(ctx context.Context, obj *models.Audio) (re
 		return err
 	})
 	return ret, err
-}
-
-func convertAudioFile(f models.File) (*models.AudioFile, error) {
-	a, ok := f.(*models.AudioFile)
-	if !ok {
-		return nil, fmt.Errorf("file %T is not an audio file", f)
-	}
-	return a, nil
 }

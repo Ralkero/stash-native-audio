@@ -33,6 +33,7 @@ type GenerateMetadataInput struct {
 	InteractiveHeatmapsSpeeds bool `json:"interactiveHeatmapsSpeeds"`
 	ClipPreviews              bool `json:"clipPreviews"`
 	ImageThumbnails           bool `json:"imageThumbnails"`
+	AudioWaveforms            bool `json:"audioWaveforms"`
 	// scene ids to generate for
 	SceneIDs []string `json:"sceneIDs"`
 	// marker ids to generate for
@@ -84,6 +85,7 @@ type totalsGenerate struct {
 	interactiveHeatmapSpeeds int64
 	clipPreviews             int64
 	imageThumbnails          int64
+	audioWaveforms           int64
 
 	tasks int
 }
@@ -238,6 +240,9 @@ func (j *GenerateJob) Execute(ctx context.Context, progress *job.Progress) error
 		if j.input.ImageThumbnails {
 			logMsg += fmt.Sprintf(" %d image thumbnails", totals.imageThumbnails)
 		}
+		if j.input.AudioWaveforms {
+			logMsg += fmt.Sprintf(" %d audio waveforms", totals.audioWaveforms)
+		}
 		if logMsg == "Generating" {
 			logMsg = "Nothing selected to generate"
 		}
@@ -293,6 +298,45 @@ func (j *GenerateJob) queueTasks(ctx context.Context, g *generate.Generator, pat
 
 	j.queueScenesTasks(ctx, g, paths, queue)
 	j.queueImagesTasks(ctx, g, paths, queue)
+	j.queueAudioTasks(ctx, paths, queue)
+}
+
+func (j *GenerateJob) queueAudioTasks(ctx context.Context, paths []string, queue chan<- Task) {
+	if !j.input.AudioWaveforms {
+		return
+	}
+
+	const batchSize = 1000
+	for offset := 0; ; offset += batchSize {
+		if job.IsCancelled(ctx) {
+			return
+		}
+
+		files, err := j.repository.File.FindAllInPaths(ctx, paths, false, batchSize, offset)
+		if err != nil {
+			logger.Errorf("Error encountered queuing audio waveforms: %s", err.Error())
+			return
+		}
+		for _, file := range files {
+			audioFile, ok := file.(*models.AudioFile)
+			if !ok {
+				continue
+			}
+			task := &GenerateAudioWaveformTask{
+				repository: j.repository,
+				File:       audioFile,
+				Overwrite:  j.overwrite,
+			}
+			if task.required() {
+				j.totals.audioWaveforms++
+				j.totals.tasks++
+				queue <- task
+			}
+		}
+		if len(files) != batchSize {
+			return
+		}
+	}
 }
 
 func (j *GenerateJob) queueScenesTasks(ctx context.Context, g *generate.Generator, paths []string, queue chan<- Task) {

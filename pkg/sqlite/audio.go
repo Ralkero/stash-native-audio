@@ -45,7 +45,11 @@ type audioRow struct {
 	LastPlayedAt NullTimestamp `db:"last_played_at"`
 	CreatedAt    Timestamp     `db:"created_at"`
 	UpdatedAt    Timestamp     `db:"updated_at"`
-	CoverBlob    zero.String   `db:"cover_blob"`
+	// CoverBlob is managed independently through UpdateCover. Audio updates are
+	// built from a models.Audio value, which intentionally does not load the
+	// cover blob; including this field in a normal UPDATE would therefore erase
+	// an existing cover whenever any metadata field changes.
+	CoverBlob zero.String `db:"cover_blob" goqu:"skipupdate"`
 }
 
 func (r *audioRow) fromAudio(a models.Audio) {

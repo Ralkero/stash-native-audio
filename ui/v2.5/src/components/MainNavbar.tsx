@@ -204,8 +204,7 @@ export const MainNavbar: React.FC = () => {
     const enabled = (items: IMenuItem[]) =>
       items.filter(
         (item) =>
-          item.name !== "audios" ||
-          configuration?.general.enableAudioLibrary
+          item.name !== "audios" || configuration?.general.enableAudioLibrary
       );
     let cfgMenuItems = configuration?.interface.menuItems;
     if (!cfgMenuItems) {

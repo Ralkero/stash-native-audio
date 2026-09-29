@@ -17,6 +17,7 @@ input GenerateMetadataInput {
   imagePhashes: Boolean
   imageThumbnails: Boolean
   clipPreviews: Boolean
+  audioWaveforms: Boolean
 
   "scene ids to generate for"
   sceneIDs: [ID!]
@@ -60,6 +61,7 @@ type GenerateMetadataOptions {
   interactiveHeatmapsSpeeds: Boolean
   imageThumbnails: Boolean
   clipPreviews: Boolean
+  audioWaveforms: Boolean
 }
 
 type GeneratePreviewOptions {
