@@ -38,7 +38,6 @@ func (r *audioResolver) HasCover(ctx context.Context, obj *models.Audio) (ret bo
 	})
 	return ret, err
 }
-
 func (r *audioResolver) Rating100(ctx context.Context, obj *models.Audio) (*int, error) {
 	return obj.Rating, nil
 }
